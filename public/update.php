@@ -1,56 +1,25 @@
 <?php
-require_once __DIR__ . '/../src/db.php';
+declare(strict_types=1);
+require __DIR__ . '/header.php';
 
-if (!isset($_POST['id'])) {
-    die('Missing file ID.');
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    exit('Invalid request.');
 }
 
-$id = (int) $_POST['id'];
-$newName = $_POST['original_name'];
+checkCsrf();
 
-// Fetch existing file
-$stmt = $pdo->prepare("SELECT * FROM files WHERE id = ?");
-$stmt->execute([$id]);
-$file = $stmt->fetch();
-
-if (!$file) {
-    die('File not found.');
+$id = (int)($_POST['id'] ?? 0);
+if ($id <= 0) {
+    exit('Invalid ID.');
 }
 
-$uploadDir = __DIR__ . '/../uploads/';
-$storedName = $file['filename'];
-$targetPath = $uploadDir . $storedName;
-
-// If a new file is uploaded → replace it
-if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
-
-    $tmpPath = $_FILES['file']['tmp_name'];
-    $mimeType = $_FILES['file']['type'];
-    $size = $_FILES['file']['size'];
-
-    // Replace file on disk
-    if (!move_uploaded_file($tmpPath, $targetPath)) {
-        die('Failed to replace file.');
-    }
-
-    // Update DB with new metadata
-    $stmt = $pdo->prepare("
-        UPDATE files
-        SET original_name = ?, mime_type = ?, size = ?, updated_at = NOW()
-        WHERE id = ?
-    ");
-    $stmt->execute([$newName, $mimeType, $size, $id]);
-
-} else {
-    // Only rename original_name
-    $stmt = $pdo->prepare("
-        UPDATE files
-        SET original_name = ?, updated_at = NOW()
-        WHERE id = ?
-    ");
-    $stmt->execute([$newName, $id]);
+$originalName = trim($_POST['original_name'] ?? '');
+if ($originalName === '') {
+    exit('Name cannot be empty.');
 }
 
-// Redirect back to list
-header("Location: list.php");
+$stmt = $pdo->prepare('UPDATE files SET original_name = ? WHERE id = ?');
+$stmt->execute([$originalName, $id]);
+
+header('Location: list.php');
 exit;

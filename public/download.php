@@ -1,34 +1,29 @@
 <?php
-require_once __DIR__ . '/../src/db.php';
+declare(strict_types=1);
+require __DIR__ . '/header.php';
 
-if (!isset($_GET['id'])) {
-    die('Missing file ID.');
+$id = (int)($_GET['id'] ?? 0);
+if ($id <= 0) {
+    exit('Invalid ID.');
 }
 
-$id = (int) $_GET['id'];
-
-// Fetch file
-$stmt = $pdo->prepare("SELECT * FROM files WHERE id = ?");
+$stmt = $pdo->prepare('SELECT filename, original_name, mime_type FROM files WHERE id = ?');
 $stmt->execute([$id]);
 $file = $stmt->fetch();
 
 if (!$file) {
-    die('File not found.');
+    http_response_code(404);
+    exit('File not found.');
 }
 
-$uploadDir = __DIR__ . '/../uploads/';
-$storedName = $file['filename'];
-$targetPath = $uploadDir . $storedName;
-
-if (!file_exists($targetPath)) {
-    die('File missing on server.');
+$path = __DIR__ . '/../uploads/' . $file['filename'];
+if (!is_file($path)) {
+    http_response_code(404);
+    exit('File missing.');
 }
 
-// Send file to browser
-header('Content-Description: File Transfer');
 header('Content-Type: ' . $file['mime_type']);
-header('Content-Disposition: attachment; filename="' . $file['original_name'] . '"');
-header('Content-Length: ' . $file['size']);
+header('Content-Length: ' . filesize($path));
+header('Content-Disposition: attachment; filename="' . basename($file['original_name']) . '"');
 
-readfile($targetPath);
-exit;
+readfile($path);

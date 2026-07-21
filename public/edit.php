@@ -1,52 +1,59 @@
 <?php
-require_once __DIR__ . '/../src/db.php';
+declare(strict_types=1);
+require __DIR__ . '/header.php';
 
-if (!isset($_GET['id'])) {
-    die('Missing file ID.');
+$id = (int)($_GET['id'] ?? 0);
+if ($id <= 0) {
+    exit('Invalid ID.');
 }
 
-$id = (int) $_GET['id'];
-
-$stmt = $pdo->prepare("SELECT * FROM files WHERE id = ?");
+$stmt = $pdo->prepare('SELECT id, original_name FROM files WHERE id = ?');
 $stmt->execute([$id]);
 $file = $stmt->fetch();
 
 if (!$file) {
-    die('File not found.');
+    exit('File not found.');
 }
 ?>
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Edit File</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
 
-<div class="container mt-5">
-    <h2 class="mb-4">Edit File</h2>
+<div class="row">
+    <div class="col-md-6 offset-md-3">
 
-    <div class="card p-4 shadow-sm">
-        <form action="update.php" method="post" enctype="multipart/form-data">
-
-            <input type="hidden" name="id" value="<?= $file['id'] ?>">
-
-            <div class="mb-3">
-                <label class="form-label">Original Name</label>
-                <input type="text" name="original_name" class="form-control"
-                       value="<?= htmlspecialchars($file['original_name']) ?>" required>
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Edit File Name</h5>
             </div>
 
-            <div class="mb-3">
-                <label class="form-label">Replace File (optional)</label>
-                <input type="file" name="file" class="form-control">
-            </div>
+            <div class="card-body">
 
-            <button type="submit" class="btn btn-warning">Update</button>
-            <a href="list.php" class="btn btn-secondary">Back</a>
-        </form>
+                <form action="update.php" method="post">
+                    <input type="hidden" name="csrf_token" value="<?= e($_SESSION['csrf_token']) ?>">
+                    <input type="hidden" name="id" value="<?= (int)$file['id'] ?>">
+
+                    <div class="mb-3">
+                        <label class="form-label">Original Name</label>
+                        <input type="text"
+                               name="original_name"
+                               class="form-control"
+                               value="<?= e($file['original_name']) ?>"
+                               required>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <button type="submit" class="btn btn-success">
+                            Save Changes
+                        </button>
+
+                        <a href="list.php" class="btn btn-secondary">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+
     </div>
 </div>
 
-</body>
-</html>
+<?php require __DIR__ . '/footer.php'; ?>

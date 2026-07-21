@@ -1,7 +1,10 @@
 </div>
 
-<footer class="bg-dark text-white text-center py-3 mt-5">
-    <small>© <?= date('Y') ?> File Manager</small>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<footer class="text-center mt-4 mb-4 text-muted">
+    <hr>
+    <p>&copy; Secure File Manager</p>
 </footer>
 
 </body>

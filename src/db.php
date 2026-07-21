@@ -1,12 +1,9 @@
 <?php
+declare(strict_types=1);
 
-$host = 'localhost';
-$db   = 'file_manager';
+$dsn = 'mysql:host=localhost;dbname=file_manager;charset=utf8mb4';
 $user = 'root';
 $pass = '';
-$charset = 'utf8mb4';
-
-$dsn = "mysql:host=$host;dbname=$db;charset=$charset";
 
 $options = [
     PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
@@ -17,5 +14,5 @@ $options = [
 try {
     $pdo = new PDO($dsn, $user, $pass, $options);
 } catch (PDOException $e) {
-    die('Database connection failed: ' . $e->getMessage());
+    exit('Database connection failed.');
 }

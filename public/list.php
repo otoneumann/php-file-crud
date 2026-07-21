@@ -1,106 +1,87 @@
 <?php
-require_once __DIR__ . '/../src/db.php';
+declare(strict_types=1);
+require __DIR__ . '/header.php';
 
-// Pagination settings
-$perPage = 5;
-$page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
-if ($page < 1) $page = 1;
-
-// Count total files
-$countStmt = $pdo->query("SELECT COUNT(*) AS cnt FROM files");
-$totalFiles = (int) $countStmt->fetch()['cnt'];
-$totalPages = $totalFiles > 0 ? (int) ceil($totalFiles / $perPage) : 1;
-$offset = ($page - 1) * $perPage;
-
-// Fetch files for current page
-$stmt = $pdo->prepare("SELECT * FROM files ORDER BY id DESC LIMIT :limit OFFSET :offset");
-$stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
-$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-$stmt->execute();
+$stmt = $pdo->query('SELECT id, original_name, mime_type, size, created_at FROM files ORDER BY id DESC');
 $files = $stmt->fetchAll();
 ?>
 
-<?php include 'header.php'; ?>
+<div class="row">
+    <div class="col-12">
 
-<h2 class="mb-4">Uploaded Files</h2>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="mb-0">Files</h2>
+            <a href="index.php" class="btn btn-primary">Upload New File</a>
+        </div>
 
-<?php if (empty($files)): ?>
-    <div class="alert alert-info">No files uploaded yet.</div>
-<?php else: ?>
-    <table class="table table-bordered table-striped shadow-sm align-middle">
-        <thead class="table-dark">
-        <tr>
-            <th>ID</th>
-            <th>Preview / Name</th>
-            <th>MIME</th>
-            <th>Size</th>
-            <th>Actions</th>
-        </tr>
-        </thead>
-        <tbody>
+        <div class="card shadow-sm">
+            <div class="card-body p-0">
 
-        <?php foreach ($files as $file): ?>
-            <?php
-            $isImage = str_starts_with($file['mime_type'], 'image/');
-            $filePath = '../uploads/' . $file['filename'];
-            ?>
-            <tr>
-                <td><?= $file['id'] ?></td>
+                <table class="table table-striped table-hover mb-0 align-middle">
+                    <thead class="table-dark">
+                    <tr>
+                        <th style="width: 60px;">ID</th>
+                        <th>Name</th>
+                        <th>MIME</th>
+                        <th style="width: 120px;">Size</th>
+                        <th style="width: 180px;">Created</th>
+                        <th style="width: 300px;">Actions</th>
+                    </tr>
+                    </thead>
 
-                <td>
-                    <?php if ($isImage): ?>
-                        <img src="<?= $filePath ?>"
-                             alt="preview"
-                             style="width:60px;height:auto;border-radius:4px;margin-right:10px;">
-                    <?php endif; ?>
+                    <tbody>
+                    <?php foreach ($files as $file): ?>
+                        <tr>
+                            <td><?= (int)$file['id'] ?></td>
+                            <td><?= e($file['original_name']) ?></td>
+                            <td><?= e($file['mime_type']) ?></td>
+                            <td><?= number_format((int)$file['size'] / 1024, 2) ?> KB</td>
+                            <td><?= e($file['created_at']) ?></td>
 
-                    <?= htmlspecialchars($file['original_name']) ?>
-                </td>
+                            <td class="text-nowrap">
 
-                <td><?= htmlspecialchars($file['mime_type']) ?></td>
-                <td><?= $file['size'] ?></td>
+                                <a href="preview.php?id=<?= (int)$file['id'] ?>"
+                                   class="btn btn-sm btn-secondary me-1">
+                                    Preview
+                                </a>
 
-                <td>
-                    <a href="preview.php?id=<?= $file['id'] ?>"
-                       class="btn btn-sm btn-info"
-                       target="_blank"
-                       rel="noopener noreferrer">
-                        Preview
-                    </a>
-                    <a href="download.php?id=<?= $file['id'] ?>" class="btn btn-sm btn-success">Download</a>
-                    <a href="edit.php?id=<?= $file['id'] ?>" class="btn btn-sm btn-warning">Edit</a>
-                    <a href="delete.php?id=<?= $file['id'] ?>" class="btn btn-sm btn-danger">Delete</a>
-                </td>
-            </tr>
-        <?php endforeach; ?>
+                                <a href="download.php?id=<?= (int)$file['id'] ?>"
+                                   class="btn btn-sm btn-info me-1">
+                                    Download
+                                </a>
 
-        </tbody>
-    </table>
-<?php endif; ?>
+                                <a href="edit.php?id=<?= (int)$file['id'] ?>"
+                                   class="btn btn-sm btn-warning me-1">
+                                    Edit Name
+                                </a>
 
-<!-- Pagination -->
-<?php if ($totalFiles > 0): ?>
-    <nav class="mt-4">
-        <ul class="pagination">
+                                <a href="edit_content.php?id=<?= (int)$file['id'] ?>"
+                                   class="btn btn-sm btn-primary me-1">
+                                    Edit Content
+                                </a>
 
-            <?php if ($page > 1): ?>
-                <li class="page-item">
-                    <a class="page-link" href="list.php?page=<?= $page - 1 ?>">Prev</a>
-                </li>
-            <?php endif; ?>
+                                <form action="delete.php" method="post" class="d-inline">
+                                    <input type="hidden" name="csrf_token" value="<?= e($_SESSION['csrf_token']) ?>">
+                                    <input type="hidden" name="id" value="<?= (int)$file['id'] ?>">
 
-            <li class="page-item active">
-                <span class="page-link"><?= $page ?> / <?= $totalPages ?></span>
-            </li>
+                                    <button type="submit"
+                                            class="btn btn-sm btn-danger"
+                                            onclick="return confirm('Delete this file?');">
+                                        Delete
+                                    </button>
+                                </form>
 
-            <?php if ($page < $totalPages): ?>
-                <li class="page-item">
-                    <a class="page-link" href="list.php?page=<?= $page + 1 ?>">Next</a>
-                </li>
-            <?php endif; ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
 
-        </ul>
-    </nav>
-<?php endif; ?>
+                </table>
 
-<?php include 'footer.php'; ?>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<?php require __DIR__ . '/footer.php'; ?>

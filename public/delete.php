@@ -1,34 +1,33 @@
 <?php
-require_once __DIR__ . '/../src/db.php';
+declare(strict_types=1);
+require __DIR__ . '/header.php';
 
-if (!isset($_GET['id'])) {
-    die('Missing file ID.');
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    exit('Invalid request.');
 }
 
-$id = (int) $_GET['id'];
+checkCsrf();
 
-// Fetch file
-$stmt = $pdo->prepare("SELECT * FROM files WHERE id = ?");
+$id = (int)($_POST['id'] ?? 0);
+if ($id <= 0) {
+    exit('Invalid ID.');
+}
+
+$stmt = $pdo->prepare('SELECT filename FROM files WHERE id = ?');
 $stmt->execute([$id]);
 $file = $stmt->fetch();
 
 if (!$file) {
-    die('File not found.');
+    exit('File not found.');
 }
 
-$uploadDir = __DIR__ . '/../uploads/';
-$storedName = $file['filename'];
-$targetPath = $uploadDir . $storedName;
-
-// Delete file from disk
-if (file_exists($targetPath)) {
-    unlink($targetPath);
+$path = __DIR__ . '/../uploads/' . $file['filename'];
+if (is_file($path)) {
+    unlink($path);
 }
 
-// Delete from database
-$stmt = $pdo->prepare("DELETE FROM files WHERE id = ?");
+$stmt = $pdo->prepare('DELETE FROM files WHERE id = ?');
 $stmt->execute([$id]);
 
-// Redirect back to list
-header("Location: list.php");
+header('Location: list.php');
 exit;
