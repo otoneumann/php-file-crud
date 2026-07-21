@@ -61,6 +61,12 @@ $files = $stmt->fetchAll();
                 <td><?= $file['size'] ?></td>
 
                 <td>
+                    <a href="preview.php?id=<?= $file['id'] ?>"
+                       class="btn btn-sm btn-info"
+                       target="_blank"
+                       rel="noopener noreferrer">
+                        Preview
+                    </a>
                     <a href="download.php?id=<?= $file['id'] ?>" class="btn btn-sm btn-success">Download</a>
                     <a href="edit.php?id=<?= $file['id'] ?>" class="btn btn-sm btn-warning">Edit</a>
                     <a href="delete.php?id=<?= $file['id'] ?>" class="btn btn-sm btn-danger">Delete</a>
