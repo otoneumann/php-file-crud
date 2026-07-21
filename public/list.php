@@ -11,7 +11,11 @@ $files = $stmt->fetchAll();
 
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h2 class="mb-0">Files</h2>
-            <a href="index.php" class="btn btn-primary">Upload New File</a>
+
+            <div>
+                <a href="create_csv.php" class="btn btn-success me-2">Create CSV</a>
+                <a href="index.php" class="btn btn-primary">Upload New File</a>
+            </div>
         </div>
 
         <div class="card shadow-sm">
