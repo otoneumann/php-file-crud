@@ -1,18 +1,10 @@
-# Enable basic security
 Options -Indexes
-
-# Allow PHP execution
-AddType application/x-httpd-php .php
-
-# Correct MIME handling for downloads
-AddType application/octet-stream .bin
 
 # Prevent access to src and uploads directly
 <Directory "../src">
     Deny from all
 </Directory>
 
-# Allow downloads only through download.php
 <Directory "../uploads">
     Options -Indexes
 </Directory>

@@ -13,7 +13,7 @@ require __DIR__ . '/header.php';
 
             <div class="card-body">
 
-                <form action="create_csv_save.php" method="post">
+                <form action="/public/create_csv_save.php" method="post">
                     <input type="hidden" name="csrf_token" value="<?= e($_SESSION['csrf_token']) ?>">
 
                     <div class="mb-3">
