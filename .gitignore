@@ -1,71 +1,36 @@
 # macOS
 .DS_Store
-.AppleDouble
-.LSOverride
-._*
-.Spotlight-V100
-.Trashes
-.VolumeIcon.icns
-.fseventsd
 
-# Editors
-*.swp
-*.swo
-*~
-.vscode/
-.history/
+# PhpStorm / JetBrains
 .idea/
 *.iml
 
-# Node
+# Node (if ever used)
 node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
 
-# Composer / PHP
+# Composer (if ever used)
 vendor/
-composer.lock
-composer.phar
-
-# Laravel
-/storage/*.key
-/storage/logs/*.log
-/storage/framework/cache/data/*
-/storage/framework/sessions/*
-/storage/framework/views/*
-/bootstrap/cache/*.php
-.env
-.env.*
-
-# Python
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-
-# Databases
-*.sql
-*.sqlite
-*.sqlite3
 
 # Logs
 *.log
-logs/
 
-# Cache / temp
-cache/
+# Cache
+.cache/
 tmp/
-temp/
 
-# Build
-dist/
-build/
-public/build/
+# Uploaded files
+uploads/*
 
-# Binaries
-*.bin
-*.exe
-*.dmg
-*.iso
+# Ignore everything inside uploads except .gitkeep
+!uploads/.gitkeep
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# System files
+Thumbs.db
+
+# Apache
+.htaccess

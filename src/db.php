@@ -1,7 +1,7 @@
 <?php
 
 $host = 'localhost';
-$db   = 'filemanager';
+$db   = 'file_manager';
 $user = 'root';
 $pass = '';
 $charset = 'utf8mb4';

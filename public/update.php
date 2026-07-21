@@ -2,11 +2,11 @@
 require_once __DIR__ . '/../src/db.php';
 
 if (!isset($_POST['id'])) {
-    die('Missing ID.');
+    die('Missing file ID.');
 }
 
 $id = (int) $_POST['id'];
-$newName = trim($_POST['new_name']);
+$newName = $_POST['original_name'];
 
 // Fetch existing file
 $stmt = $pdo->prepare("SELECT * FROM files WHERE id = ?");
@@ -18,46 +18,39 @@ if (!$file) {
 }
 
 $uploadDir = __DIR__ . '/../uploads/';
-$currentPath = $uploadDir . $file['filename'];
-$updatedFilename = $file['filename']; // default: unchanged
-$updatedMime = $file['mime_type'];
-$updatedSize = $file['size'];
+$storedName = $file['filename'];
+$targetPath = $uploadDir . $storedName;
 
-// If user uploaded a replacement file
-if (!empty($_FILES['new_file']['name'])) {
+// If a new file is uploaded → replace it
+if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
 
-    $newFile = $_FILES['new_file'];
-    $tmpPath = $newFile['tmp_name'];
-    $mimeType = $newFile['type'];
-    $size = $newFile['size'];
+    $tmpPath = $_FILES['file']['tmp_name'];
+    $mimeType = $_FILES['file']['type'];
+    $size = $_FILES['file']['size'];
 
-    // Generate new stored filename
-    $newStoredName = uniqid() . '_' . basename($newFile['name']);
-    $newPath = $uploadDir . $newStoredName;
-
-    // Move new file
-    if (!move_uploaded_file($tmpPath, $newPath)) {
+    // Replace file on disk
+    if (!move_uploaded_file($tmpPath, $targetPath)) {
         die('Failed to replace file.');
     }
 
-    // Delete old file
-    if (file_exists($currentPath)) {
-        unlink($currentPath);
-    }
+    // Update DB with new metadata
+    $stmt = $pdo->prepare("
+        UPDATE files
+        SET original_name = ?, mime_type = ?, size = ?, updated_at = NOW()
+        WHERE id = ?
+    ");
+    $stmt->execute([$newName, $mimeType, $size, $id]);
 
-    // Update metadata
-    $updatedFilename = $newStoredName;
-    $updatedMime = $mimeType;
-    $updatedSize = $size;
+} else {
+    // Only rename original_name
+    $stmt = $pdo->prepare("
+        UPDATE files
+        SET original_name = ?, updated_at = NOW()
+        WHERE id = ?
+    ");
+    $stmt->execute([$newName, $id]);
 }
 
-// Update database record
-$stmt = $pdo->prepare("
-    UPDATE files
-    SET original_name = ?, filename = ?, mime_type = ?, size = ?, updated_at = NOW()
-    WHERE id = ?
-");
-$stmt->execute([$newName, $updatedFilename, $updatedMime, $updatedSize, $id]);
-
-echo "File updated.";
-echo "<br><a href='list.php'>Back</a>";
+// Redirect back to list
+header("Location: list.php");
+exit;

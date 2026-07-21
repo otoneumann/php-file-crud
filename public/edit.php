@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../src/db.php';
 
 if (!isset($_GET['id'])) {
-    die('Missing ID.');
+    die('Missing file ID.');
 }
 
 $id = (int) $_GET['id'];
@@ -17,24 +17,36 @@ if (!$file) {
 ?>
 <!DOCTYPE html>
 <html>
-<body>
+<head>
+    <title>Edit File</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
 
-<h2>Edit File</h2>
+<div class="container mt-5">
+    <h2 class="mb-4">Edit File</h2>
 
-<form action="update.php" method="post" enctype="multipart/form-data">
-    <input type="hidden" name="id" value="<?= $file['id'] ?>">
+    <div class="card p-4 shadow-sm">
+        <form action="update.php" method="post" enctype="multipart/form-data">
 
-    <label>Rename file:</label><br>
-    <input type="text" name="new_name" value="<?= htmlspecialchars($file['original_name']) ?>"><br><br>
+            <input type="hidden" name="id" value="<?= $file['id'] ?>">
 
-    <label>Replace file (optional):</label><br>
-    <input type="file" name="new_file"><br><br>
+            <div class="mb-3">
+                <label class="form-label">Original Name</label>
+                <input type="text" name="original_name" class="form-control"
+                       value="<?= htmlspecialchars($file['original_name']) ?>" required>
+            </div>
 
-    <button type="submit">Save changes</button>
-</form>
+            <div class="mb-3">
+                <label class="form-label">Replace File (optional)</label>
+                <input type="file" name="file" class="form-control">
+            </div>
 
-<br>
-<a href="list.php">Back</a>
+            <button type="submit" class="btn btn-warning">Update</button>
+            <a href="list.php" class="btn btn-secondary">Back</a>
+        </form>
+    </div>
+</div>
 
 </body>
 </html>

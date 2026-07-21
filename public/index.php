@@ -1,17 +1,13 @@
 <?php require_once __DIR__ . '/../src/db.php'; ?>
-<!DOCTYPE html>
-<html>
-<body>
+<?php include 'header.php'; ?>
 
-<h2>Upload a File</h2>
+<h2 class="mb-4">Upload a File</h2>
 
-<form action="upload.php" method="post" enctype="multipart/form-data">
-    <input type="file" name="file" required>
-    <button type="submit">Upload</button>
+<form action="upload.php" method="post" enctype="multipart/form-data" class="card p-4 shadow-sm">
+    <div class="mb-3">
+        <input type="file" name="file" class="form-control" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Upload</button>
 </form>
 
-<br>
-<a href="list.php">View uploaded files</a>
-
-</body>
-</html>
+<?php include 'footer.php'; ?>
